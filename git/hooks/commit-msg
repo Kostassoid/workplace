@@ -1,15 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env bash
 
-import sys, re
+commit_regex='([A-Z\d]*-[0-9]+|merge)'
+error_msg="ABORTING COMMIT! Missing JIRA Issue ID: $(cat $1)"
 
-message = open(sys.argv[1],'r').read().strip()
-
-checker = re.compile(r"[A-Z\d]+-{1}[0-9]+:.*")
-
-if checker.match(message):
-	print "Commit message checker: OK"
-	exit(0)
-else:
-	print "Commit message checker: FAIL"
-	print '"{}" does not include issue tracker code.'.format(message)
-	print 'Expected format: "{project}-{number}: {commit description}"'
+if ! grep -iqE "$commit_regex" "$1"; then
+    echo "$error_msg" >&2
+    exit 1
+fi
